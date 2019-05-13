@@ -32,7 +32,7 @@ export default class App extends React.Component {
             Brightness.setBrightnessAsync(1);
             this.setState({ bright: !this.state.bright });
           }
-        }, 250);
+        }, 1000);
       }
     } catch (err) {
       console.log(err);
