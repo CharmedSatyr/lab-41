@@ -1,9 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { TextInput } from 'react-native';
 
-import { Accelerometer } from 'expo';
 import { Permissions } from 'expo';
 import { Brightness } from 'expo';
+
+import { encode, decode } from 'morsee';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -32,11 +34,16 @@ export default class App extends React.Component {
             Brightness.setBrightnessAsync(1);
             this.setState({ bright: !this.state.bright });
           }
-        }, 1000);
+        }, 10000);
       }
     } catch (err) {
       console.log(err);
     }
+  };
+
+  handleSubmit = () => {
+    console.log(this.state.text);
+    console.log(encode(this.state.text));
   };
   async componentDidMount() {
     const { status } = await Permissions.askAsync(Permissions.SYSTEM_BRIGHTNESS);
@@ -51,6 +58,12 @@ export default class App extends React.Component {
         <Text>I have a lovely bunch of coconuts.</Text>
         <Text>Deedley-dee!</Text>
         <Text>There they are standing in the road...</Text>
+        <TextInput
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+          onChangeText={text => this.setState({ text })}
+          value={this.state.text}
+          onSubmitEditing={this.handleSubmit}
+        />
       </View>
     );
   }
