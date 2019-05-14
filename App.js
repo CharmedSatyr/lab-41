@@ -34,7 +34,7 @@ export default class App extends React.Component {
     return Brightness.getBrightnessAsync();
   };
 
-  flashMorse = async (encoded, i = 0) => {
+  playMorse = async (encoded, i = 0) => {
     try {
       const result = await this.dim();
       const { interval } = this.state;
@@ -53,7 +53,7 @@ export default class App extends React.Component {
           const result = await this.bright();
           Player.playSound('short');
           if (result === 1) {
-            setTimeout(() => this.flashMorse(encoded, j), interval);
+            setTimeout(() => this.playMorse(encoded, j), interval);
           }
         }
 
@@ -61,12 +61,12 @@ export default class App extends React.Component {
           const result = await this.bright();
           Player.playSound('long');
           if (result === 1) {
-            setTimeout(() => this.flashMorse(encoded, j), 3 * interval);
+            setTimeout(() => this.playMorse(encoded, j), 3 * interval);
           }
         }
 
         if (char === ' ') {
-          setTimeout(() => this.flashMorse(encoded, j), 3 * interval);
+          setTimeout(() => this.playMorse(encoded, j), 3 * interval);
         }
       }
     } catch (err) {
@@ -89,7 +89,7 @@ export default class App extends React.Component {
       const encoded = this.toMorse(this.state.text);
       const result = await this.dim();
       if (result == undefined) {
-        this.flashMorse(encoded);
+        this.playMorse(encoded);
       }
     } catch (err) {
       console.error(err);
