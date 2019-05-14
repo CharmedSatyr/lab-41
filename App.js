@@ -11,7 +11,7 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       brightness: null, // get and restore original brightness
-      interval: 60,
+      interval: 100,
       loop: false, // If true, loop the message
       permissions: null,
       soundReady: false,
@@ -35,40 +35,42 @@ export default class App extends React.Component {
   };
 
   flashMorse = async (encoded, i = 0) => {
-    const result = await this.dim();
-    const { interval } = this.state;
-    console.log('I:', i);
-    if (result !== 1) {
-      const j = i + 1;
-      if (i >= encoded.length) {
-        console.log('FINISHED!');
-        return;
-      }
-      const char = encoded[i];
-      console.log('CHAR:', encoded[i]);
-
-      if (char === '.') {
-        console.log('.');
-        const result = await this.bright();
-        Player.playSound('short');
-        if (result === 1) {
-          setTimeout(() => this.flashMorse(encoded, j), interval);
+    try {
+      const result = await this.dim();
+      const { interval } = this.state;
+      console.log('I:', i);
+      if (result !== 1) {
+        const j = i + 1;
+        if (i >= encoded.length) {
+          console.log('FINISHED!');
+          Brightness.setBrightnessAsync(this.state.brightness);
+          return;
         }
-      }
+        const char = encoded[i];
+        console.log('CHAR:', encoded[i]);
 
-      if (char === '-') {
-        console.log('-');
-        const result = await this.bright();
-        Player.playSound('long');
-        if (result === 1) {
+        if (char === '.') {
+          const result = await this.bright();
+          Player.playSound('short');
+          if (result === 1) {
+            setTimeout(() => this.flashMorse(encoded, j), interval);
+          }
+        }
+
+        if (char === '-') {
+          const result = await this.bright();
+          Player.playSound('long');
+          if (result === 1) {
+            setTimeout(() => this.flashMorse(encoded, j), 3 * interval);
+          }
+        }
+
+        if (char === ' ') {
           setTimeout(() => this.flashMorse(encoded, j), 3 * interval);
         }
       }
-
-      if (char === ' ') {
-        console.log(' / ');
-        setTimeout(() => this.flashMorse(encoded, j), 3 * interval);
-      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -86,7 +88,7 @@ export default class App extends React.Component {
     try {
       const encoded = this.toMorse(this.state.text);
       const result = await this.dim();
-      if (result !== undefined) {
+      if (result == undefined) {
         this.flashMorse(encoded);
       }
     } catch (err) {
@@ -95,10 +97,11 @@ export default class App extends React.Component {
   };
 
   async componentDidMount() {
+    const brightness = await Brightness.getBrightnessAsync();
     const { status } = await Permissions.askAsync(Permissions.SYSTEM_BRIGHTNESS);
-    this.setState({ permissions: status }, () => {
+    this.setState({ brightness, permissions: status }, () => {
+      console.log('BRIGHTNESS:', brightness);
       console.log('STATUS:', status);
-      this.handleSubmit();
     });
   }
 
