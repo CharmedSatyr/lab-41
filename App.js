@@ -1,21 +1,26 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { AppLoading, Brightness, Font, Permissions } from 'expo';
+import { Brightness, Permissions } from 'expo';
+import { AppLoading } from 'expo';
 import { encode } from 'morsee';
 
 import soundLibrary from './sound-library';
 import Player from './player';
+
+const dark = '#111';
+const light = '#eee';
+const interval = 50;
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       brightness: null, // get and restore original brightness
-      interval: 100,
       loop: false, // If true, loop the message
       permissions: null,
       soundReady: false,
       text: 'SOS',
+      backgroundColor: light,
     };
   }
 
@@ -24,53 +29,62 @@ export default class App extends React.Component {
     return Promise.all([...sounds]);
   };
 
-  bright = () => {
-    Brightness.setBrightnessAsync(1);
-    return Brightness.getBrightnessAsync();
+  bright = async () => {
+    try {
+      Brightness.setBrightnessAsync(1);
+      return await Brightness.getBrightnessAsync();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  dim = () => {
-    Brightness.setBrightnessAsync(0);
-    return Brightness.getBrightnessAsync();
+  dash = (encoded, j) => {
+    Player.playSound('long');
+    this.setState({ backgroundColor: light, color: dark });
+    setTimeout(() => {
+      this.playMorse(encoded, j);
+      this.setState({ backgroundColor: dark, color: light });
+    }, 3 * interval);
+  };
+
+  dot = (encoded, j) => {
+    Player.playSound('short');
+    this.setState({ backgroundColor: light, color: dark });
+    setTimeout(() => {
+      this.playMorse(encoded, j);
+      this.setState({ backgroundColor: dark, color: light });
+    }, interval);
+  };
+
+  space = (encoded, j) => {
+    setTimeout(() => this.playMorse(encoded, j), 3 * interval);
+  };
+
+  finish = () => {
+    console.log('FINISHED!');
+    Brightness.setBrightnessAsync(this.state.brightness);
+    setInterval(() => {
+      this.setState({ backgroundColor: light, color: dark });
+    }, interval);
   };
 
   playMorse = async (encoded, i = 0) => {
-    try {
-      const result = await this.dim();
-      const { interval } = this.state;
-      console.log('I:', i);
-      if (result !== 1) {
-        const j = i + 1;
-        if (i >= encoded.length) {
-          console.log('FINISHED!');
-          Brightness.setBrightnessAsync(this.state.brightness);
-          return;
-        }
-        const char = encoded[i];
-        console.log('CHAR:', encoded[i]);
+    if (i >= encoded.length) {
+      this.finish();
+      return;
+    }
 
-        if (char === '.') {
-          const result = await this.bright();
-          Player.playSound('short');
-          if (result === 1) {
-            setTimeout(() => this.playMorse(encoded, j), interval);
-          }
-        }
+    const { interval } = this.state;
+    const j = i + 1;
+    const char = encoded[i];
+    console.log('I:', i, ', J:', j, ', CHAR:', encoded[i]);
 
-        if (char === '-') {
-          const result = await this.bright();
-          Player.playSound('long');
-          if (result === 1) {
-            setTimeout(() => this.playMorse(encoded, j), 3 * interval);
-          }
-        }
-
-        if (char === ' ') {
-          setTimeout(() => this.playMorse(encoded, j), 3 * interval);
-        }
-      }
-    } catch (err) {
-      console.error(err);
+    if (char === '.') {
+      this.dot(encoded, j);
+    } else if (char === '-') {
+      this.dash(encoded, j);
+    } else if (char === ' ') {
+      this.space(encoded, j);
     }
   };
 
@@ -82,62 +96,84 @@ export default class App extends React.Component {
   };
 
   handleSubmit = async e => {
-    if (e) {
-      e.preventDefault();
-    }
-    try {
-      const encoded = this.toMorse(this.state.text);
-      const result = await this.dim();
-      if (result == undefined) {
-        this.playMorse(encoded);
-      }
-    } catch (err) {
-      console.error(err);
+    e.preventDefault();
+    const encoded = this.toMorse(this.state.text);
+    this.setState({ backgroundColor: dark, color: light });
+    const result = await this.bright();
+    // This should be 1, but many issues with battery conservation!
+    if (result !== undefined) {
+      this.playMorse(encoded);
     }
   };
 
+  toggleSoundReady = () => {
+    this.setState({ soundReady: !this.state.soundReady });
+  };
+
   async componentDidMount() {
-    const brightness = await Brightness.getBrightnessAsync();
-    const { status } = await Permissions.askAsync(Permissions.SYSTEM_BRIGHTNESS);
-    this.setState({ brightness, permissions: status }, () => {
-      console.log('BRIGHTNESS:', brightness);
-      console.log('STATUS:', status);
-    });
+    try {
+      const brightness = await Brightness.getBrightnessAsync();
+      const { status } = await Permissions.askAsync(Permissions.SYSTEM_BRIGHTNESS);
+      this.setState({ brightness, permissions: status }, () => {
+        console.log('BRIGHTNESS:', brightness);
+        console.log('STATUS:', status);
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   render() {
     if (!this.state.soundReady) {
       return (
         <AppLoading
+          autoHideSplash={true}
           startAsync={this.loadAssets}
-          onFinish={() => this.setState({ soundReady: true })}
+          onFinish={this.toggleSoundReady}
           onError={console.warn}
         />
       );
+    } else {
+      return (
+        <View
+          style={{
+            alignItems: 'center',
+            backgroundColor: this.state.backgroundColor,
+            color: this.state.color,
+            flex: 1,
+            justifyContent: 'center',
+            padding: 1,
+          }}
+        >
+          <Text
+            style={{
+              backgroundColor: this.state.backgroundColor,
+              color: this.state.color,
+              fontSize: 20,
+              fontWeight: 'bold',
+              marginBottom: 20,
+              padding: 1,
+            }}
+          >
+            Morse Code Translator
+          </Text>
+          <TextInput
+            style={{
+              backgroundColor: this.state.backgroundColor,
+              borderColor: 'gray',
+              borderRadius: 4,
+              borderWidth: 1,
+              color: this.state.color,
+              height: 40,
+              padding: 1,
+              width: 100,
+            }}
+            onChangeText={text => this.setState({ text })}
+            onSubmitEditing={this.handleSubmit}
+            value={this.state.text}
+          />
+        </View>
+      );
     }
-
-    return (
-      <View style={styles.container}>
-        <Text>I have a lovely bunch of coconuts!</Text>
-        <Text>(Deedley-dee!)</Text>
-        <Text>There they are a-standing in the road!</Text>
-        <Text>(Dum dum dum...)</Text>
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 4, width: 100 }}
-          onChangeText={text => this.setState({ text })}
-          value={this.state.text}
-          onSubmitEditing={this.handleSubmit}
-        />
-      </View>
-    );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
