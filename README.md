@@ -6,29 +6,19 @@
 ### Authors: Gregory Dukes, Joesph Wolfe
 
 ### Links and Resources
-* [repo](http://xyz.com)
+* [repo](https://github.com/charmedsatyr-401-advanced-javascript/lab-41)
 * [front-end](http://xyz.com) (when applicable)
 
 
 ### Modules
 #### `react`, `react-native`, `expo`, `morsee`
 
-##### Exported Values and Methods
-
-###### `setBright(interval) -> sets brightness on device`
-Usage Notes or examples
-
-###### `bar(array) -> array`
-Usage Notes or examples
 
 ### Setup
-#### `.env` requirements
-* `PORT` - 19000
-* `MONGODB_URI` - URL to the running mongo instance/db
+#### Download the app from the app store.
+
 
 #### Running the app
-* `npm start`
-* Endpoint: `/foo/bar/`
-  * Returns a JSON object with abc in it.
-* Endpoint: `/bing/zing/`
-  * Returns a JSON object with xyz in it.
+ * open the app
+ * enter a phrase to turn into morse code
+ * ejoy the show
