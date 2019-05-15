@@ -42,7 +42,9 @@
 This application uses React Native, Expo, and the Morsee library to covert text to Morse code. When a user types input into the app's text field, a version of that text encoded into Morse code will appear below the input box. When the user submits the text using the appropriate button on their mobile device's keyboard, the device's screen will be set to maximum brightness, and the device will beep the Morse code version of the user input in sync with text color and background color changes intended to simulate a flashing light. When the playback has completed, the screen will dim to its original brightness level.
 
 #### Implementation Note
-Because looping through a series of characters is generally synchronous and would not have allowed each sound/flash to have been played for the required length, the React Native implementation uses Morsee to convert user input to Morse code and then calls a `playMorse` function recursively on the encoded text. The recursive calls produce an effect that approximates asynchronous playback.
+Because looping through a series of characters is generally synchronous and would not have allowed each sound/flash to have been played for the required length, `App.js` uses Morsee to convert user input to Morse code and then calls a `playMorse` function recursively on the encoded text. Paired with `setTimeout`, the recursive calls produce an effect that approximates asynchronous playback.
+
+The authors are indebted to [Antenna.io](https://antenna.io/blog/2019/05/preload-and-replay-sounds-in-react-native-expo) for a tutorial on dynamically preloading external sound files in Expo.
 
 #### Custom Sound Files
 The original sound files from the beeps were distributed by [Sound Jay](https://www.soundjay.com/beep-sounds-7.html) and manually edited in Audacity to customize file size and beep length and to remove dead airtime.
