@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { /* StyleSheet, */ Text, TextInput, View } from 'react-native';
 import { Brightness, Permissions } from 'expo';
 import { AppLoading } from 'expo';
 import { encode } from 'morsee';
@@ -68,13 +68,12 @@ export default class App extends React.Component {
     }, interval);
   };
 
-  playMorse = async (encoded, i = 0) => {
+  playMorse = (encoded, i = 0) => {
     if (i >= encoded.length) {
       this.finish();
       return;
     }
 
-    const { interval } = this.state;
     const j = i + 1;
     const char = encoded[i];
     console.log('I:', i, ', J:', j, ', CHAR:', encoded[i]);
