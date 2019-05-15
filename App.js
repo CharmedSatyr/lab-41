@@ -19,7 +19,7 @@ export default class App extends React.Component {
       loop: false, // If true, loop the message
       permissions: null,
       soundReady: false,
-      text: 'SOS',
+      text: '',
       backgroundColor: light,
     };
   }
@@ -169,8 +169,20 @@ export default class App extends React.Component {
             }}
             onChangeText={text => this.setState({ text })}
             onSubmitEditing={this.handleSubmit}
+            placeholder={'SOS'}
             value={this.state.text}
           />
+          <Text
+            style={{
+              backgroundColor: this.state.backgroundColor,
+              color: this.state.color,
+              fontWeight: 'bold',
+              marginTop: 20,
+              padding: 1,
+            }}
+          >
+            {encode(this.state.text)}
+          </Text>
         </View>
       );
     }
