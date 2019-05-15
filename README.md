@@ -3,7 +3,7 @@
 
 ## Lab 41: React Native
 
-### Authors: Gregory Dukes, Joesph Wolfe
+### Authors: Gregory Dukes, Joseph Wolfe
 
 ### Links and Resources
 * [GitHub](https://github.com/charmedsatyr-401-advanced-javascript/lab-41)
