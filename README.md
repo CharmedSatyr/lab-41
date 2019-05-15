@@ -1,7 +1,7 @@
 ![CF](http://i.imgur.com/7v5ASc8.png) LAB
 =================================================
 
-## Lab41 React Native
+## Lab 41: React Native
 
 ### Authors: Gregory Dukes, Joesph Wolfe
 
